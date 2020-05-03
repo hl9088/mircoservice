@@ -43,7 +43,7 @@ public class CustomerController {
 
         // 通过服务注册方式
         InstanceInfo server = client.getNextServerFromEureka("service", false);
-        // contextPath 需要拼接 这个地方还是有点问题
+        // contextPath 需要拼接 这个地方还是有点问题 而且需要拼接接口地址
         String serverUrl = server.getHomePageUrl() + "provider";
         logger.info("server url = {}", serverUrl);
         String result3 = restTemplate.getForObject(serverUrl, String.class);

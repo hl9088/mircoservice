@@ -24,7 +24,7 @@ public class ProviderController {
 
     @GetMapping("/info")
     public String info() {
-        InstanceInfo server = client.getNextServerFromEureka("provider", false);
+        InstanceInfo server = client.getNextServerFromEureka("service", false);
         return server.getHomePageUrl();
     }
 
