@@ -18,7 +18,7 @@
     <artifactId>spring-boot-starter-web</artifactId>
 </dependency>
 ```
-```properties
+```yaml
 server:
   port: 8002 #端口
   servlet:
@@ -28,7 +28,7 @@ spring:
   application:
     name: service
 ```
-```properties
+```yaml
 server:
   port: 8001 #端口
   servlet:
@@ -103,7 +103,9 @@ public class CustomerController {
         </dependency>
     </dependencies>
 </dependencyManagement>
-
+```
+```xml
+<!-- 如果原来没有引入这个依赖的话 启动会报错 引入下 -->
 <dependencies>
     <dependency>
         <groupId>org.springframework.boot</groupId>
@@ -119,7 +121,7 @@ public class CustomerController {
     <version>2.2.2.RELEASE</version>
 </dependency>
 ```
-```properties
+```yaml
 server:
   port: 8888
 eureka:
@@ -147,7 +149,7 @@ public class EurekaApplication {
     <version>2.2.2.RELEASE</version>
 </dependency>
 ```
-```properties
+```yaml
 eureka:
   client:
     service-url:
@@ -182,7 +184,7 @@ public class ProviderController {
     <version>2.2.2.RELEASE</version>
 </dependency>
 ```
-```properties
+```yaml
 eureka:
   client:
     service-url:
