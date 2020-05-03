@@ -1,0 +1,17 @@
+server:
+  port: 8002 #端口
+  servlet:
+    context-path: /provider #应用名称
+
+spring:
+  application:
+    name: service
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8003/eureka # eureka服务端注册地址
+
+
+
+
