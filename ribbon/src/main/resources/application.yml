@@ -1,0 +1,13 @@
+server:
+  port: 8003
+  servlet:
+    context-path: /ribbon
+spring:
+  application:
+    name: ribbon-demo
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8888/eureka
+  instance:
+    prefer-ip-address: true

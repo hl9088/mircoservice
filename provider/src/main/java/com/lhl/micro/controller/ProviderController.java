@@ -22,10 +22,13 @@ public class ProviderController {
         return "Hello world from provider";
     }
 
-    @GetMapping("/info")
-    public String info() {
-        InstanceInfo server = client.getNextServerFromEureka("service", false);
+    /**
+     * 测试获取自己的服务信息
+     * @return
+     */
+    @GetMapping("/test")
+    public String test() {
+        InstanceInfo server = client.getNextServerFromEureka("provider-demo", false);
         return server.getHomePageUrl();
     }
-
 }

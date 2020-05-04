@@ -1,11 +1,11 @@
 server:
-  port: 8002 #端口
+  port: 8011 #端口
   servlet:
-    context-path: /provider #应用名称
+    context-path: /provider
 
 spring:
   application:
-    name: service
+    name: provider-demo #应用名称
 
 eureka:
   client:

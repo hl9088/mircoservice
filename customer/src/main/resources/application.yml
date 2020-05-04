@@ -1,12 +1,12 @@
 server:
-  port: 8001 #端口
+  port: 8002 #端口
   servlet:
     context-path: /customer
 provider:
-  url: http://localhost:8002/provider
+  url: http://localhost:8001/provider
 spring:
   application:
-    name: customer #应用名称
+    name: customer-demo #应用名称
 eureka:
   client:
     service-url:

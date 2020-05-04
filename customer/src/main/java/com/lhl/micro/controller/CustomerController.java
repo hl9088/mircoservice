@@ -19,7 +19,7 @@ public class CustomerController {
 
     private static Logger logger = LoggerFactory.getLogger(CustomerController.class);
 
-    private static final String URL = "http://localhost:8002/provider";
+    private static final String URL = "http://localhost:8001/provider";
 
     @Autowired
     private RestTemplate restTemplate;
@@ -42,7 +42,7 @@ public class CustomerController {
         logger.info("second way : {}", result2);
 
         // 通过服务注册方式
-        InstanceInfo server = client.getNextServerFromEureka("service", false);
+        InstanceInfo server = client.getNextServerFromEureka("provider-demo", false);
         // contextPath 需要拼接 这个地方还是有点问题 而且需要拼接接口地址
         String serverUrl = server.getHomePageUrl() + "provider";
         logger.info("server url = {}", serverUrl);

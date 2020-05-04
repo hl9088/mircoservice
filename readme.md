@@ -224,3 +224,116 @@ public class CustomerController {
 ```
 * 注意
 ```client.getNextServerFromEureka("service", false)```入参为应用名称，不是请求路径中contextPath名称
+
+## ribbon负载均衡的配置
+* 新建ribbon子模块 
+1. 引入依赖 ribbon也是作为一个eureka客户端使用的 所以要引入eureka客户端依赖
+```xml
+<dependencies>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        <version>2.2.2.RELEASE</version>
+    </dependency>
+    
+    <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-netflix-ribbon -->
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-netflix-ribbon</artifactId>
+        <version>2.2.2.RELEASE</version>
+    </dependency>
+</dependencies>
+```
+```yaml
+server:
+  port: 8003
+  servlet:
+    context-path: /ribbon
+spring:
+  application:
+    name: ribbon-demo
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8888/eureka
+  instance:
+    prefer-ip-address: true
+```
+2. 启动类上增加```@RibbonClient``` 指定服务方名称 如果有多个服务端 则默认采用轮训方式进行调用
+```java
+@SpringBootApplication
+@EnableEurekaClient
+@RibbonClient(value = "PROVIDER-DEMO")
+public class RibbonApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(RibbonApplication.class, args);
+    }
+
+    @Bean
+    @LoadBalanced
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+
+@RestController
+public class RibbonController {
+
+    private static Logger logger = LoggerFactory.getLogger(RibbonController.class);
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @GetMapping("/")
+    public String doCustomer() {
+        return restTemplate.getForObject("http://PROVIDER-DEMO/provider/", String.class);
+    }
+}
+```
+3. 自定义负载均衡策略: 启动类上为```@RibbonClient``` 配置configuration 同时在springboot启动过程中排除掉对应配置的自动注入
+```java
+@SpringBootApplication
+@EnableEurekaClient
+@RibbonClient(value = "PROVIDER-DEMO", configuration = RibbonConfig.class)
+//@ComponentScan(excludeFilters = {@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = RibbonConfig.class)})
+@ComponentScan(excludeFilters = {@ComponentScan.Filter(type = FilterType.ANNOTATION, value = IgnoreScan.class)})
+public class RibbonApplication {
+}
+
+@Configuration
+@IgnoreScan
+public class RibbonConfig {
+
+    private static Logger logger = LoggerFactory.getLogger(RibbonConfig.class);
+
+    @Bean
+    public BeanPostProcessor beanPostProcessor(){
+        logger.error("初始化beanPostProcessor");
+        return new BeanPostProcessor() {
+            @Override
+            public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+                logger.error("after 加载了{}", beanName);
+                return bean;
+            }
+
+            @Override
+            public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+                logger.error("before 加载了{}", beanName);
+                return bean;
+            }
+        };
+    }
+
+    @Bean
+    public IRule ribbonRule() {
+        // 使用随机算法
+        return new RandomRule();
+    }
+}
+```
