@@ -20,7 +20,7 @@
 ```
 ```yaml
 server:
-  port: 8002 #端口
+  port: 8001 #端口
   servlet:
     context-path: /provider #应用名称
 
@@ -30,11 +30,11 @@ spring:
 ```
 ```yaml
 server:
-  port: 8001 #端口
+  port: 8002 #端口
   servlet:
     context-path: /customer
 provider:
-  url: http://localhost:8002/provider
+  url: http://localhost:8001/provider
 spring:
   application:
     name: customer #应用名称
@@ -68,7 +68,7 @@ public class CustomerController {
 
     private static Logger logger = LoggerFactory.getLogger(CustomerController.class);
 
-    private static final String URL = "http://localhost:8002/provider";
+    private static final String URL = "http://localhost:8001/provider";
 
     @Autowired
     private RestTemplate restTemplate;
