@@ -337,3 +337,69 @@ public class RibbonConfig {
     }
 }
 ```
+
+## feign的配置使用
+* 创建feign子模块 引入依赖
+```xml
+<dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+            <version>2.2.2.RELEASE</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-openfeign -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+            <version>2.2.2.RELEASE</version>
+        </dependency>
+    </dependencies>
+```
+```java
+@SpringBootApplication
+@EnableEurekaClient
+@EnableFeignClients
+public class FeignApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(FeignApplication.class, args);
+    }
+}
+
+@FeignClient(name = "PROVIDER-DEMO", path = "provider")
+public interface FeignServiceClient {
+
+    @RequestMapping("/")
+    String doService();
+}
+
+@RestController
+public class FeignController {
+
+    @Autowired
+    private FeignServiceClient client;
+
+    @GetMapping("/")
+    public String doService(){
+        return client.doService();
+    }
+}
+```
+```yaml
+server:
+  port: 8004
+  servlet:
+    context-path: /feign
+spring:
+  application:
+    name: feign-demo
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8888/eureka
+```
