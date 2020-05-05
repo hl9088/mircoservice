@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
  */
 @SpringBootApplication
 @EnableEurekaClient
-@EnableCircuitBreaker
+@EnableCircuitBreaker // 启用熔断器
 public class HystrixApplication {
     public static void main(String[] args) {
         SpringApplication.run(HystrixApplication.class, args);

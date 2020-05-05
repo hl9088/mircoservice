@@ -385,7 +385,7 @@ public class FeignController {
     private FeignServiceClient client;
 
     @GetMapping("/")
-    public String doService(){
+    public String doCustomer(){
         return client.doService();
     }
 }
@@ -480,3 +480,85 @@ eureka:
     service-url:
       defaultZone: http://localhost:8888/eureka
 ```
+## feign与hystrix集成配置 消费端
+* 新建feign-hystrix子模块 引入依赖等
+```xml
+<dependencies>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        <version>2.2.2.RELEASE</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-openfeign -->
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-openfeign</artifactId>
+        <version>2.2.2.RELEASE</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-netflix-hystrix -->
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+        <version>2.2.2.RELEASE</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-actuator</artifactId>
+        <version>2.2.6.RELEASE</version>
+    </dependency>
+</dependencies>
+```
+* 启动类配置和feign子模块配置相同 接口的注解```@FeignClient```里面增加fallback 指定请求方法出现错误时 执行哪个类的同名方法 并返回结果
+```java
+@SpringBootApplication
+@EnableEurekaClient
+@EnableFeignClients
+public class FeignHystrixApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(FeignHystrixApplication.class, args);
+    }
+}
+
+@FeignClient(name = "PROVIDER-DEMO", path = "provider", fallback = FeignServiceClientImpl.class)
+public interface FeignServiceClient {
+    @RequestMapping("/")
+    String doService();
+}
+
+@Component //要加这个注解 否则启动时报错了
+public class FeignServiceClientImpl implements FeignServiceClient {
+
+    @Override
+    public String doService() {
+        return "hello world from feign-hystrix";
+    }
+}
+```
+* 配置文件里面新增配置```feign.hystrix.enabled = true```
+```yaml
+server:
+  port: 8006
+  servlet:
+    context-path: /feign-hystrix
+spring:
+  application:
+    name: feign-hystrix
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8888/eureka
+feign:
+  hystrix:
+    enabled: true
+```
+
+* 测试方法 启动eureka、provider、feign-hystrix各个模块 通过关闭provider测试请求返回结果

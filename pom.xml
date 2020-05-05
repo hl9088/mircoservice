@@ -10,6 +10,7 @@
         <module>ribbon</module>
         <module>feign</module>
         <module>hystrix</module>
+        <module>feign-hystrix</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
