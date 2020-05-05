@@ -1,0 +1,11 @@
+server:
+  port: 8005
+  servlet:
+    context-path: /hystrix
+spring:
+  application:
+    name: hystrix-demo
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8888/eureka

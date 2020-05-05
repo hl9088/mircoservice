@@ -225,7 +225,7 @@ public class CustomerController {
 * 注意
 ```client.getNextServerFromEureka("service", false)```入参为应用名称，不是请求路径中contextPath名称
 
-## ribbon负载均衡的配置
+## ribbon负载均衡的配置 消费端
 * 新建ribbon子模块 
 1. 引入依赖 ribbon也是作为一个eureka客户端使用的 所以要引入eureka客户端依赖
 ```xml
@@ -338,28 +338,28 @@ public class RibbonConfig {
 }
 ```
 
-## feign的配置使用
+## feign的配置使用 消费端
 * 创建feign子模块 引入依赖
 ```xml
 <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
 
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-            <version>2.2.2.RELEASE</version>
-        </dependency>
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        <version>2.2.2.RELEASE</version>
+    </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-openfeign -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-openfeign</artifactId>
-            <version>2.2.2.RELEASE</version>
-        </dependency>
-    </dependencies>
+    <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-openfeign -->
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-openfeign</artifactId>
+        <version>2.2.2.RELEASE</version>
+    </dependency>
+</dependencies>
 ```
 ```java
 @SpringBootApplication
@@ -398,6 +398,83 @@ server:
 spring:
   application:
     name: feign-demo
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8888/eureka
+```
+* feignClient的配置待完善
+
+## hystrix的配置与使用 断路器  消费端 
+
+* 新建hystrix子模块 引入依赖 
+```xml
+<dependencies>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        <version>2.2.2.RELEASE</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-netflix-hystrix -->
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+        <version>2.2.2.RELEASE</version>
+    </dependency>
+</dependencies>
+```
+* 使用```@EnableCircuitBreaker```启用hystrix   配置服务请求失败后执行方法```@HystrixCommand(fallbackMethod = "fallback")```
+```java
+@SpringBootApplication
+@EnableEurekaClient
+@EnableCircuitBreaker
+public class HystrixApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(HystrixApplication.class, args);
+    }
+
+    @Bean
+    public RestTemplate restTemplate(){
+        return new RestTemplate();
+    }
+}
+
+@RestController
+public class HystrixController {
+
+    @Autowired
+    private EurekaClient client;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @RequestMapping("/")
+    @HystrixCommand(fallbackMethod = "fallback")
+    public String doCoustomer() {
+        InstanceInfo server = client.getNextServerFromEureka("provider-demo", false);
+        return restTemplate.getForObject(server.getHomePageUrl() + "provider/", String.class);
+    }
+
+    private String fallback(){
+        return "all server is down";
+    }
+}
+```
+* 配置文件和普通消费者一致 注册到eureka即可
+```yaml
+server:
+  port: 8005
+  servlet:
+    context-path: /hystrix
+spring:
+  application:
+    name: hystrix-demo
 eureka:
   client:
     service-url:
